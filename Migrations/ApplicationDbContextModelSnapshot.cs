@@ -67,7 +67,9 @@ namespace VisualSync.Api.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("IdPaquete"));
 
                     b.Property<bool>("Activo")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<int>("CantidadFotos")
                         .HasColumnType("integer");

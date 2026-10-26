@@ -20,4 +20,5 @@ public class PaqueteCrearDto
     public int CantidadFotos { get; set; }
 
     public bool IncluyeVideo { get; set; }
+    public bool Activo { get; set; } = true;
 }
