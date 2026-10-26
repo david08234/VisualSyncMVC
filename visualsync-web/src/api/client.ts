@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-export const client = axios.create({ 
-  baseURL: import.meta.env.VITE_API_URL 
+export const client = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 client.interceptors.request.use((config) => {
@@ -13,10 +13,15 @@ client.interceptors.request.use((config) => {
 client.interceptors.response.use(
   (res) => res,
   (error) => {
-    if (error.response?.status === 401 && !error.config.url?.includes('/auth/login')) {
-      localStorage.clear();
+    const url: string = error.config?.url ?? '';
+    const esAuth = url.includes('/auth/login') || url.includes('/auth/registro');
+
+    // Sesión vencida o token inválido: se limpia y se vuelve al login
+    if (error.response?.status === 401 && !esAuth) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('usuario');
       window.location.href = '/login';
     }
     return Promise.reject(error);
-  }
+  },
 );

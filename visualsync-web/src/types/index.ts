@@ -1,9 +1,10 @@
+export type Rol = 'Admin' | 'Cliente';
+
 export interface Usuario {
   idUsuario: number;
-  rol: string;
   nombreCompleto: string;
-  email: string;
-  passwordHash?: string;
+  rol: Rol;
+  email?: string;
 }
 
 export interface PaqueteServicio {
