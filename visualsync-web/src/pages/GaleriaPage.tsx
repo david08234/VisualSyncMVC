@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { obtenerReserva } from '../api/reservas';
+import { useAuth } from '../context/AuthContext';
 import type { Reserva } from '../types';
 import EstadoPagoBadge from '../components/EstadoPagoBadge';
 import Loading from '../components/Loading';
 
 export default function GaleriaPage() {
   const { id } = useParams();
+  const { usuario } = useAuth();
   const [reserva, setReserva] = useState<Reserva | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -18,6 +20,9 @@ export default function GaleriaPage() {
 
   if (loading) return <Loading />;
   if (!reserva) return <div className="alert alert-danger mt-4 shadow-sm border-0">No se pudo encontrar la reserva.</div>;
+  if (!usuario || reserva.idUsuario !== usuario.idUsuario) {
+    return <div className="alert alert-danger mt-4 shadow-sm border-0">No tienes permiso para acceder a esta galería.</div>;
+  }
 
   const pagoAprobado = reserva.estadoPago === 'Aprobado';
 
