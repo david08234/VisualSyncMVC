@@ -53,12 +53,24 @@ export default function SolicitarReservaPage() {
       await actualizarReserva(reservaCreada.idReserva!, reservaConPago);
 
       navigate('/mis-reservas');
-    } catch (error: any) {
+    } catch {
       setErrorApi('Ocurrió un error al enviar la solicitud. Intenta nuevamente.');
     }
   };
 
-  if (!paquete) return <div className="text-center mt-5"><div className="spinner-border text-primary" /></div>;
+  if (!paquete) {
+    if (errorApi) {
+      return <div className="container py-4"><div className="alert alert-danger">{errorApi}</div></div>;
+    }
+
+    return (
+      <div className="text-center mt-5">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Cargando paquete...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="row justify-content-center py-4">
@@ -76,7 +88,7 @@ export default function SolicitarReservaPage() {
 
         <div className="card border-0 shadow-sm">
           <div className="card-body p-4">
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
               <div className="row">
                 <div className="col-md-6 mb-3">
                   <label className="form-label fw-semibold">Fecha y Hora</label>

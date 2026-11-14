@@ -33,7 +33,7 @@ export default function MisReservasPage() {
     try {
       await eliminarReserva(id);
       cargarReservas();
-    } catch (err) {
+    } catch {
       alert('Error al cancelar la reserva.');
     }
   };
@@ -42,7 +42,13 @@ export default function MisReservasPage() {
     <div className="container py-4">
       <h2 className="fw-bold mb-4" style={{ color: '#14213D' }}>Mis Reservas</h2>
 
-      {loading && <div className="text-center"><div className="spinner-border text-primary" /></div>}
+      {loading && (
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Cargando reservas...</span>
+          </div>
+        </div>
+      )}
       {error && <div className="alert alert-danger">{error}</div>}
 
       {!loading && !error && reservas.length === 0 && (

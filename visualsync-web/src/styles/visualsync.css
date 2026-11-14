@@ -1,0 +1,75 @@
+:root {
+  --vs-navy: #14213d;
+  --vs-navy-hover: #0d172b;
+  --vs-bg: #f8fafc;
+  --vs-border: #e5e9f0;
+  --vs-muted: #6b7280;
+  --vs-text: #111827;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--vs-bg);
+  color: var(--vs-text);
+}
+
+/* Barra de navegación */
+.vs-nav { background: #fff; border-bottom: 1px solid var(--vs-border); z-index: 1020; }
+.vs-brand { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.01em; color: var(--vs-text); text-decoration: none; }
+.vs-brand:hover { color: var(--vs-text); }
+.vs-link { color: var(--vs-muted); text-decoration: none; font-size: 0.9rem; padding: 0.2rem 0; border-bottom: 2px solid transparent; }
+.vs-link:hover { color: var(--vs-text); }
+.vs-link.active { color: var(--vs-text); font-weight: 600; border-bottom-color: var(--vs-navy); }
+
+.vs-menu { display: none; width: 100%; flex-direction: column; align-items: flex-start; gap: 0.9rem; padding: 0.9rem 0 0.4rem; }
+.vs-menu--abierto { display: flex; }
+@media (min-width: 768px) {
+  .vs-menu { display: flex; width: auto; flex-direction: row; align-items: center; gap: 1.5rem; padding: 0; }
+}
+
+/* Botones */
+.vs-btn { background: var(--vs-navy); color: #fff; border: 0; border-radius: 8px; font-weight: 600; font-size: 0.9rem; padding: 0.65rem 1rem; }
+.vs-btn:hover, .vs-btn:focus { background: var(--vs-navy-hover); color: #fff; }
+.vs-btn:disabled { opacity: 0.65; }
+.vs-btn--sm { padding: 0.4rem 1rem; font-size: 0.85rem; }
+.vs-btn-outline { background: #fff; color: var(--vs-text); border: 1px solid var(--vs-border); border-radius: 8px; font-weight: 600; font-size: 0.85rem; padding: 0.4rem 1rem; }
+.vs-btn-outline:hover { background: var(--vs-bg); }
+
+/* Títulos */
+.vs-eyebrow { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--vs-muted); }
+.vs-title { font-weight: 700; letter-spacing: -0.02em; }
+
+/* Tarjetas de paquetes */
+.vs-card { background: #fff; border: 1px solid var(--vs-border); border-radius: 14px; overflow: hidden; height: 100%; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06); transition: box-shadow 0.2s, transform 0.2s; }
+.vs-card:hover { box-shadow: 0 12px 28px rgba(16, 24, 40, 0.12); transform: translateY(-2px); }
+.vs-card-img { width: 100%; height: 210px; object-fit: cover; display: block; }
+.vs-card-img--vacia { background: linear-gradient(135deg, #dbe4f0, #f1f5f9); }
+.vs-price { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.vs-price small { font-size: 0.7rem; font-weight: 400; color: var(--vs-muted); letter-spacing: 0; }
+.vs-divider { border-top: 1px solid var(--vs-border); margin: 0.9rem 0; }
+.vs-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 0.2rem 0; }
+.vs-row > span { color: var(--vs-muted); }
+.vs-row i { margin-right: 0.5rem; }
+.vs-row strong { font-weight: 600; color: var(--vs-text); }
+.vs-desc { font-size: 0.8rem; color: var(--vs-muted); margin: 0.6rem 0 1rem; }
+
+/* Formularios */
+.form-label { font-size: 0.8rem; font-weight: 600; }
+.form-control { border-radius: 8px; border-color: var(--vs-border); padding: 0.65rem 0.8rem; font-size: 0.9rem; }
+.form-control:focus { border-color: var(--vs-navy); box-shadow: 0 0 0 3px rgba(20, 33, 61, 0.12); }
+.vs-eye { position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); background: none; border: 0; color: var(--vs-muted); padding: 0.25rem; }
+
+/* Pantallas de acceso (login y registro) */
+.vs-auth { display: grid; grid-template-columns: 1fr; min-height: 100vh; background: #fff; }
+.vs-auth-hero { display: none; position: relative; background: linear-gradient(145deg, #14213D 0%, #1f3a5f 55%, #6d28d9 100%); }
+.vs-auth-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 18, 35, 0.75), rgba(10, 18, 35, 0) 55%); }
+.vs-auth-hero-text { position: absolute; left: 2.5rem; right: 2.5rem; bottom: 2.5rem; z-index: 1; color: #fff; }
+.vs-auth-panel { display: flex; align-items: center; padding: 2rem 1.5rem; }
+.vs-auth-box { width: 100%; max-width: 380px; margin: 0 auto; }
+.vs-tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--vs-border); margin-bottom: 1.75rem; }
+.vs-tab { text-align: center; padding: 0.6rem; font-size: 0.85rem; color: var(--vs-muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.vs-tab.active { color: var(--vs-text); font-weight: 600; border-bottom-color: var(--vs-navy); }
+@media (min-width: 992px) {
+  .vs-auth { grid-template-columns: 1.05fr 1fr; }
+  .vs-auth-hero { display: block; }
+}

@@ -25,7 +25,8 @@ export default function PaquetesPage() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(paqueteSchema)
+    resolver: zodResolver(paqueteSchema),
+    defaultValues: { incluyeVideo: false, activo: true }
   });
 
   const cargarPaquetes = () => {
@@ -50,7 +51,7 @@ export default function PaquetesPage() {
       setModoEdicion(null);
       reset();
       cargarPaquetes();
-    } catch (err) {
+    } catch {
       setError('Error al guardar el paquete. Revisa los datos.');
     }
   };
@@ -66,7 +67,7 @@ export default function PaquetesPage() {
     try {
       await desactivar(id);
       cargarPaquetes();
-    } catch (err) {
+    } catch {
       setError('No se pudo desactivar el paquete.');
     }
   };
@@ -77,7 +78,7 @@ export default function PaquetesPage() {
         <h2 className="fw-bold mb-0" style={{ color: '#14213D' }}>Gestión de Paquetes</h2>
         <button 
           className="btn btn-primary fw-bold" 
-          onClick={() => { setMostrarFormulario(!mostrarFormulario); setModoEdicion(null); reset({}); }}
+          onClick={() => { setMostrarFormulario(!mostrarFormulario); setModoEdicion(null); reset(); }}
         >
           {mostrarFormulario ? 'Cancelar' : '+ Nuevo Paquete'}
         </button>
@@ -89,27 +90,32 @@ export default function PaquetesPage() {
         <div className="card shadow-sm border-0 mb-4 bg-light">
           <div className="card-body">
             <h5 className="fw-bold text-primary mb-3">{modoEdicion ? 'Editar Paquete' : 'Crear Nuevo Paquete'}</h5>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
               <div className="row g-3">
                 <div className="col-md-6">
                   <label className="form-label fw-semibold">Nombre del Paquete</label>
                   <input type="text" className={`form-control ${errors.nombre ? 'is-invalid' : ''}`} {...register('nombre')} />
+                  <div className="invalid-feedback">{errors.nombre?.message as string}</div>
                 </div>
                 <div className="col-md-3">
                   <label className="form-label fw-semibold">Precio (Bs.)</label>
                   <input type="number" step="0.1" className={`form-control ${errors.precio ? 'is-invalid' : ''}`} {...register('precio')} />
+                  <div className="invalid-feedback">{errors.precio?.message as string}</div>
                 </div>
                 <div className="col-md-3">
                   <label className="form-label fw-semibold">Duración (Horas)</label>
                   <input type="number" className={`form-control ${errors.duracion ? 'is-invalid' : ''}`} {...register('duracion')} />
+                  <div className="invalid-feedback">{errors.duracion?.message as string}</div>
                 </div>
                 <div className="col-12">
                   <label className="form-label fw-semibold">Descripción</label>
                   <textarea rows={2} className={`form-control ${errors.descripcion ? 'is-invalid' : ''}`} {...register('descripcion')} />
+                  <div className="invalid-feedback">{errors.descripcion?.message as string}</div>
                 </div>
                 <div className="col-md-4">
                   <label className="form-label fw-semibold">Cantidad de Fotos</label>
                   <input type="number" className={`form-control ${errors.cantidadFotos ? 'is-invalid' : ''}`} {...register('cantidadFotos')} />
+                  <div className="invalid-feedback">{errors.cantidadFotos?.message as string}</div>
                 </div>
                 <div className="col-md-4 d-flex align-items-end">
                   <div className="form-check mb-2">

@@ -1,53 +1,57 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [abierto, setAbierto] = useState(false);
 
-  const handleLogout = () => {
+  if (pathname === '/login' || pathname === '/registro') return null;
+
+  const cerrar = () => setAbierto(false);
+  const salir = () => {
     logout();
-    navigate('/login');
+    cerrar();
+    navigate('/');
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark shadow-sm" style={{ backgroundColor: '#14213D' }}>
-      <div className="container">
-        <Link className="navbar-brand fw-bold" to="/">VisualSync</Link>
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto align-items-center">
-            {!usuario && (
-              <>
-                <li className="nav-item"><Link className="nav-link" to="/">Catálogo</Link></li>
-                <li className="nav-item"><Link className="nav-link" to="/login">Iniciar Sesión</Link></li>
-                <li className="nav-item ms-2"><Link className="btn btn-primary fw-bold px-4" to="/registro">Registrarse</Link></li>
-              </>
-            )}
-            
-            {usuario?.rol === 'Cliente' && (
-              <>
-                <li className="nav-item"><Link className="nav-link" to="/">Inicio</Link></li>
-                <li className="nav-item"><Link className="nav-link" to="/mis-reservas">Mis reservas</Link></li>
-                <li className="nav-item ms-2">
-                  <button className="btn btn-outline-light btn-sm" onClick={handleLogout}>Cerrar sesión</button>
-                </li>
-              </>
-            )}
+    <nav className="vs-nav sticky-top">
+      <div className="container d-flex flex-wrap align-items-center justify-content-between py-3">
+        <Link to="/" className="vs-brand" onClick={cerrar}>VisualSync</Link>
 
-            {usuario?.rol === 'Admin' && (
-              <>
-                <li className="nav-item"><Link className="nav-link" to="/admin">Panel general</Link></li>
-                <li className="nav-item"><Link className="nav-link" to="/admin/paquetes">Paquetes</Link></li>
-                <li className="nav-item ms-2">
-                  <button className="btn btn-outline-light btn-sm" onClick={handleLogout}>Cerrar sesión</button>
-                </li>
-              </>
-            )}
-          </ul>
+        <button
+          type="button"
+          className="btn border-0 p-0 d-md-none"
+          aria-label="Abrir menú"
+          onClick={() => setAbierto(!abierto)}
+        >
+          <i className="bi bi-list fs-2" />
+        </button>
+
+        <div className={`vs-menu ${abierto ? 'vs-menu--abierto' : ''}`}>
+          <NavLink to="/" end className="vs-link" onClick={cerrar}>Servicios</NavLink>
+
+          {!usuario && (
+            <Link to="/login" className="btn vs-btn vs-btn--sm" onClick={cerrar}>Login</Link>
+          )}
+
+          {usuario?.rol === 'Cliente' && (
+            <>
+              <NavLink to="/mis-reservas" className="vs-link" onClick={cerrar}>Mis reservas</NavLink>
+              <button type="button" className="vs-btn-outline" onClick={salir}>Cerrar sesión</button>
+            </>
+          )}
+
+          {usuario?.rol === 'Admin' && (
+            <>
+              <NavLink to="/admin" end className="vs-link" onClick={cerrar}>Panel</NavLink>
+              <NavLink to="/admin/paquetes" className="vs-link" onClick={cerrar}>Paquetes</NavLink>
+              <button type="button" className="vs-btn-outline" onClick={salir}>Cerrar sesión</button>
+            </>
+          )}
         </div>
       </div>
     </nav>

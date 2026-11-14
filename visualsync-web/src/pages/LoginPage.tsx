@@ -7,6 +7,8 @@ import { loginSchema } from '../schemas';
 import { loginUsuario } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import { mensajeDeError } from '../utils/mensajeDeError';
+import AuthLayout from '../components/AuthLayout';
+import PasswordInput from '../components/PasswordInput';
 
 type LoginForm = z.infer<typeof loginSchema>;
 
@@ -35,60 +37,48 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-12 col-md-6 col-lg-4">
-        <div className="card shadow-sm border-0 mt-5">
-          <div className="card-body p-4">
-            <h3 className="text-center mb-4 fw-bold text-primary">Iniciar Sesión</h3>
+    <AuthLayout>
+      <h1 className="h3 vs-title mb-1">Bienvenido de nuevo</h1>
+      <p className="text-secondary small mb-4">Accede a tus reservas y a tus mejores recuerdos.</p>
 
-            {recienRegistrado && (
-              <div className="alert alert-success py-2">
-                Cuenta creada. Ya puedes iniciar sesión.
-              </div>
-            )}
-            {errorApi && <div className="alert alert-danger py-2">{errorApi}</div>}
+      {recienRegistrado && (
+        <div className="alert alert-success py-2 small">Cuenta creada. Ya puedes iniciar sesión.</div>
+      )}
+      {errorApi && <div className="alert alert-danger py-2 small">{errorApi}</div>}
 
-            <form onSubmit={handleSubmit(onSubmit)} noValidate>
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Correo Electrónico</label>
-                <input
-                  type="email"
-                  autoComplete="email"
-                  className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                  {...register('email')}
-                />
-                <div className="invalid-feedback">{errors.email?.message}</div>
-              </div>
-
-              <div className="mb-4">
-                <label className="form-label fw-semibold">Contraseña</label>
-                <input
-                  type="password"
-                  autoComplete="current-password"
-                  className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                  {...register('password')}
-                />
-                <div className="invalid-feedback">{errors.password?.message}</div>
-              </div>
-
-              <button
-                type="submit"
-                className="btn btn-primary w-100 fw-bold"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Iniciando...' : 'Ingresar'}
-              </button>
-            </form>
-
-            <div className="text-center mt-3">
-              <span className="text-muted">¿No tienes cuenta? </span>
-              <Link to="/registro" className="text-decoration-none fw-bold">
-                Regístrate aquí
-              </Link>
-            </div>
-          </div>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <div className="mb-3">
+          <label className="form-label">Correo electrónico</label>
+          <input
+            type="email"
+            autoComplete="email"
+            placeholder="tu@email.com"
+            className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+            {...register('email')}
+          />
+          {errors.email && <div className="invalid-feedback d-block">{errors.email.message}</div>}
         </div>
-      </div>
-    </div>
+
+        <div className="mb-4">
+          <label className="form-label">Contraseña</label>
+          <PasswordInput
+            autoComplete="current-password"
+            placeholder="••••••••"
+            invalido={!!errors.password}
+            {...register('password')}
+          />
+          {errors.password && <div className="invalid-feedback d-block">{errors.password.message}</div>}
+        </div>
+
+        <button type="submit" className="btn vs-btn w-100" disabled={isSubmitting}>
+          {isSubmitting ? 'Iniciando...' : 'Iniciar sesión'}
+        </button>
+      </form>
+
+      <p className="text-center text-muted small mt-4 mb-0">
+        ¿Aún no tienes cuenta?{' '}
+        <Link to="/registro" className="text-dark fw-semibold">Regístrate</Link>
+      </p>
+    </AuthLayout>
   );
 }
