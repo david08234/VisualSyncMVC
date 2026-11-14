@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VisualSync.Api.Data;
@@ -5,6 +7,7 @@ using VisualSync.Api.Models;
 
 namespace VisualSync.Api.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class ReservasController : ControllerBase
@@ -16,42 +19,69 @@ public class ReservasController : ControllerBase
         _context = context;
     }
 
+    private int? UsuarioActualId
+    {
+        get
+        {
+            var valor = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(valor, out var id) ? id : null;
+        }
+    }
+
+    private bool EsAdmin => User.IsInRole("Admin");
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Reserva>>> GetReservas()
     {
-        // Incluimos los datos del Usuario y el Paquete para que la respuesta sea más completa
-        return await _context.Reservas
-            .Include(r => r.Usuario)
-            .Include(r => r.Paquete)
-            .ToListAsync();
+        IQueryable<Reserva> consulta = _context.Reservas
+            .Include(r => r.Paquete);
+
+        if (!EsAdmin)
+        {
+            var idUsuario = UsuarioActualId;
+            if (idUsuario == null) return Forbid();
+            consulta = consulta.Where(r => r.IdUsuario == idUsuario.Value);
+        }
+
+        return await consulta.ToListAsync();
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Reserva>> GetReserva(int id)
     {
         var reserva = await _context.Reservas
-            .Include(r => r.Usuario)
             .Include(r => r.Paquete)
             .FirstOrDefaultAsync(r => r.IdReserva == id);
 
         if (reserva == null) return NotFound();
+        if (!EsAdmin && reserva.IdUsuario != UsuarioActualId) return Forbid();
         return reserva;
     }
 
+    [Authorize(Roles = "Cliente")]
     [HttpPost]
     public async Task<ActionResult<Reserva>> PostReserva(Reserva reserva)
     {
-        // 1. Validar si la fecha y hora ya están ocupadas por otra reserva activa
+        var idUsuario = UsuarioActualId;
+        if (idUsuario == null) return Forbid();
+
+        reserva.IdUsuario = idUsuario.Value;
+        reserva.EstadoReserva = "Solicitada";
+        reserva.EstadoPago = "SinComprobante";
+        reserva.RutaComprobanteQR = null;
+        reserva.MotivoRechazo = null;
+        reserva.DescargasHabilitadas = false;
+        reserva.Usuario = null;
+        reserva.Paquete = null;
+
         bool fechaOcupada = await _context.Reservas
             .AnyAsync(r => r.FechaEvento == reserva.FechaEvento && r.EstadoReserva != "Cancelada");
 
         if (fechaOcupada)
         {
-            // 2. Retorna el código 409 (Conflicto) que el frontend de React está esperando
             return Conflict(new { detail = "Ya existe una reserva para esta fecha y hora. Por favor, elige otro horario." });
         }
 
-        // 3. Si la fecha está libre, guarda la reserva normalmente
         _context.Reservas.Add(reserva);
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetReserva), new { id = reserva.IdReserva }, reserva);
@@ -62,7 +92,32 @@ public class ReservasController : ControllerBase
     {
         if (id != reserva.IdReserva) return BadRequest();
 
-        _context.Entry(reserva).State = EntityState.Modified;
+        var reservaActual = await _context.Reservas.FindAsync(id);
+        if (reservaActual == null) return NotFound();
+
+        var idUsuario = UsuarioActualId;
+        if (!EsAdmin && reservaActual.IdUsuario != idUsuario) return Forbid();
+
+        if (EsAdmin)
+        {
+            reservaActual.IdUsuario = reserva.IdUsuario;
+            reservaActual.IdPaquete = reserva.IdPaquete;
+            reservaActual.FechaEvento = reserva.FechaEvento;
+            reservaActual.LugarEvento = reserva.LugarEvento;
+            reservaActual.EstadoReserva = reserva.EstadoReserva;
+            reservaActual.EstadoPago = reserva.EstadoPago;
+            reservaActual.RutaComprobanteQR = reserva.RutaComprobanteQR;
+            reservaActual.MotivoRechazo = reserva.MotivoRechazo;
+            reservaActual.DescargasHabilitadas = reserva.DescargasHabilitadas;
+        }
+        else
+        {
+            if (reserva.EstadoPago != "PendienteValidacion" && reserva.EstadoPago != "SinComprobante")
+                return Forbid();
+
+            reservaActual.EstadoPago = reserva.EstadoPago;
+            reservaActual.RutaComprobanteQR = reserva.RutaComprobanteQR;
+        }
 
         try
         {
@@ -82,6 +137,7 @@ public class ReservasController : ControllerBase
     {
         var reserva = await _context.Reservas.FindAsync(id);
         if (reserva == null) return NotFound();
+        if (!EsAdmin && reserva.IdUsuario != UsuarioActualId) return Forbid();
 
         _context.Reservas.Remove(reserva);
         await _context.SaveChangesAsync();

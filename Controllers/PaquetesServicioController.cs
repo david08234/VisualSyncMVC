@@ -40,7 +40,7 @@ public class PaquetesServicioController : ControllerBase
     }
 
     // ADMIN: crear (Ficha E: Impedir duplicados)
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<PaqueteServicio>> PostPaquete(PaqueteCrearDto dto)
     {
@@ -67,7 +67,7 @@ public class PaquetesServicioController : ControllerBase
             Duracion = dto.Duracion,
             CantidadFotos = dto.CantidadFotos,
             IncluyeVideo = dto.IncluyeVideo,
-            Activo = true
+            Activo = dto.Activo
             
         };
         _context.PaquetesServicio.Add(paquete);
@@ -76,7 +76,7 @@ public class PaquetesServicioController : ControllerBase
     }
 
     // ADMIN: actualizar (Ficha E: Impedir duplicados al editar)
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [HttpPut("{id:int}")]
     public async Task<ActionResult<PaqueteServicio>> PutPaquete(int id, PaqueteCrearDto dto)
     {
