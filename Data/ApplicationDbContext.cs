@@ -20,6 +20,9 @@ public class ApplicationDbContext : DbContext
         
         b.Entity<PaqueteServicio>().Property(p => p.Precio).HasPrecision(10, 2);
         
+        // Ficha F: Valor por defecto en la base de datos para Activo
+        b.Entity<PaqueteServicio>().Property(p => p.Activo).HasDefaultValue(true);
+        
         b.Entity<Reserva>().Property(r => r.FechaEvento).HasColumnType("timestamp without time zone");
 
         b.Entity<Reserva>()

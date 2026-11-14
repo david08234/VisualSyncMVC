@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace VisualSync.Api.Models;
 
@@ -21,6 +22,7 @@ public class Usuario
 
     [Required]
     [MaxLength(100)]
+    [JsonIgnore]
     public string PasswordHash { get; set; } = null!;
     public ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();
 }

@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VisualSync.Api.Data;
+using VisualSync.Api.DTOs;
 using VisualSync.Api.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace VisualSync.Api.Controllers;
 
@@ -33,30 +34,61 @@ public class UsuariosController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
+    public async Task<ActionResult<Usuario>> PostUsuario(UsuarioAdminDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.Password))
+            return BadRequest(new ProblemDetails
+            {
+                Status = 400,
+                Title = "Bad Request",
+                Detail = "La contraseña es obligatoria para crear un usuario."
+            });
+
+        var email = dto.Email.Trim().ToLowerInvariant();
+        if (await _context.Usuarios.AnyAsync(u => u.Email == email))
+            return Conflict(new ProblemDetails
+            {
+                Status = 409,
+                Title = "Conflict",
+                Detail = "Ya existe una cuenta con ese correo."
+            });
+
+        var usuario = new Usuario
+        {
+            NombreCompleto = dto.NombreCompleto.Trim(),
+            Email = email,
+            Rol = dto.Rol,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, 11)
+        };
+
         _context.Usuarios.Add(usuario);
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetUsuario), new { id = usuario.IdUsuario }, usuario);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutUsuario(int id, Usuario usuario)
+    public async Task<IActionResult> PutUsuario(int id, UsuarioAdminDto dto)
     {
-        if (id != usuario.IdUsuario) return BadRequest();
+        var usuario = await _context.Usuarios.FindAsync(id);
+        if (usuario == null) return NotFound();
 
-        _context.Entry(usuario).State = EntityState.Modified;
+        var email = dto.Email.Trim().ToLowerInvariant();
+        if (await _context.Usuarios.AnyAsync(u => u.Email == email && u.IdUsuario != id))
+            return Conflict(new ProblemDetails
+            {
+                Status = 409,
+                Title = "Conflict",
+                Detail = "Ya existe una cuenta con ese correo."
+            });
 
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!_context.Usuarios.Any(e => e.IdUsuario == id)) return NotFound();
-            else throw;
-        }
+        usuario.NombreCompleto = dto.NombreCompleto.Trim();
+        usuario.Email = email;
+        usuario.Rol = dto.Rol;
 
+        if (!string.IsNullOrWhiteSpace(dto.Password))
+            usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, 11);
+
+        await _context.SaveChangesAsync();
         return NoContent();
     }
 
